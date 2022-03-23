@@ -1,0 +1,115 @@
+plugins {
+	id 'org.springframework.boot' version '2.4.4'
+	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+	id 'io.freefair.lombok' version '5.3.3.3'
+	id 'com.moowork.node' version '1.3.1'
+	id 'java'
+	id 'war'
+}
+
+node {
+	version ='12.13.1'
+	npmVersion ='6.12.1'
+	workDir = file("./src/frontend")
+	npmWorkDir = file("./src/frontend")
+	nodeModulesDir = file("./src/frontend")
+}
+
+group = 'sw'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '11'
+
+apply plugin:'war'
+bootWar {
+	archiveFileName = 'icvs.war'
+}
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+ext {
+	mapstructVersion = "1.4.1.Final"
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	compileOnly 'org.projectlombok:lombok'
+	implementation 'org.springframework.boot:spring-boot-devtools'
+	annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+	annotationProcessor 'org.projectlombok:lombok'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	implementation 'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+	implementation 'org.webjars:webjars-locator-core'
+	implementation 'org.webjars:jquery:3.5.1'
+	implementation 'org.webjars:jquery-ui:1.12.1'
+	implementation 'org.webjars:lodash:4.17.15'
+	implementation 'org.webjars:momentjs:2.24.0'
+	implementation 'com.google.guava:guava:30.0-jre'
+
+	implementation group: 'commons-io', name: 'commons-io', version: '2.6'
+
+
+	providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
+
+	implementation group: 'com.oracle.database.jdbc', name: 'ojdbc11', version: '21.1.0.0'
+//	runtimeOnly 'com.oracle.database.jdbc:ojdbc11'
+	implementation group: 'com.oracle.ojdbc', name: 'orai18n', version: '19.3.0.0'
+	implementation "org.mapstruct:mapstruct:${mapstructVersion}"
+	implementation 'com.querydsl:querydsl-apt'
+	implementation 'com.querydsl:querydsl-jpa'
+//	implementation 'com.fasterxml.jackson.core:jackson-databind'
+
+	annotationProcessor "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:jpa"
+	annotationProcessor "jakarta.persistence:jakarta.persistence-api"
+	annotationProcessor "jakarta.annotation:jakarta.annotation-api"
+	annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}", 'org.projectlombok:lombok-mapstruct-binding:0.1.0'
+
+}
+
+def generatedDir = "$buildDir/generated"
+sourceSets {
+	main.java.srcDir generatedDir
+}
+
+tasks.withType(JavaCompile) {
+	options.annotationProcessorGeneratedSourcesDirectory = file(generatedDir)
+	doFirst {
+		println "AnnotationProcessorPath for $name is ${options.getAnnotationProcessorPath().getFiles()}"
+	}
+}
+
+//task setUp(type: NpmTask) {
+//	description = "Install Node.Js packages"
+//	args = ['install']
+//	inputs.files file('package.json')
+//	outputs.files files('node_modules')
+//}
+//
+//task buildFrontEnd(type: NpmTask, dependsOn: setUp){
+//	description = "Build vue.js"
+//	args = ['run', 'build']
+//}
+//
+//task buildSpringResources(type: NpmTask){
+//	description = "Build front-end-bootvue to spring"
+//	workingDir = file("${project.projectDir}/praticevue11")
+//	args = ['run', 'build']
+//}
+
+//processResources.dependsOn 'buildSpringResources'
+
+test {
+	useJUnitPlatform()
+}
+
